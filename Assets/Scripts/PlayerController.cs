@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public int Cherry;
 
     private bool IsHurt;
+    private bool IsGrounded;
     
     void Start()
     {
@@ -35,17 +36,20 @@ public class PlayerController : MonoBehaviour
         {
             Movement();
         }
-        if(Mathf.Abs(Rb.velocity.x) < 0.1f) //受伤后恢复
+        if(Mathf.Abs(Rb.velocity.x) < 0.1f && Mathf.Abs(Rb.velocity.y) < 0.1f) //受伤后恢复
         {
             IsHurt = false;
             Anim.SetBool("Hurting",false);
             Anim.SetBool("Idle",true);
+            Anim.SetFloat("Running",0);
         }
+        
     }
     void Update()
     {
         Jump();
         AnimSwitch();
+        IsGrounded = Coll.IsTouchingLayers(Ground);
     }
 
     void Movement() //移动
@@ -64,7 +68,7 @@ public class PlayerController : MonoBehaviour
     }
     void Jump() //跳跃和下落
     {
-        if((Input.GetKeyDown(KeyCode.Space)) && (Coll.IsTouchingLayers(Ground)))//跳跃(一次)
+        if((Input.GetKeyDown(KeyCode.Space)) && IsGrounded)//跳跃(一次)
         {
             Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
             Anim.SetBool("Jumping",true); //跳跃动画
@@ -75,6 +79,7 @@ public class PlayerController : MonoBehaviour
     {
         if(Rb.velocity.y < 0) //下落
         {
+            Anim.SetBool("Idle",false);
             Anim.SetBool("Jumping",false);
             Anim.SetBool("Falling",true);
         }
@@ -104,8 +109,12 @@ public class PlayerController : MonoBehaviour
             if(Anim.GetBool("Falling")) //踩敌人
             {
                 Destroy(collision.gameObject);
-                Anim.SetBool("Jumping",true);
                 Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
+                Anim.SetBool("Jumping",true);
+                Anim.SetFloat("Running",0);
+                Anim.SetBool("Idle",false);
+                Anim.SetBool("Hurting",false);
+                Anim.SetBool("Falling",false);
             }
             else
             {
