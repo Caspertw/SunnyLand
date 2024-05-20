@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
     //[SerializeField]
-    private Rigidbody2D Rb;
+    private Rigidbody2D Rb; 
+    private Animator Anim;
+
     public Collider2D Coll;
+    public LayerMask Ground;
+    public TextMeshProUGUI CherryNum;
+
     public float Speed;
     public float JumpForce;
     public int Cherry;
     
-    private Animator Anim;
-    public LayerMask Ground;
     void Start()
     {
         Rb = GetComponent<Rigidbody2D>();
@@ -49,7 +54,7 @@ public class PlayerController : MonoBehaviour
     }
     void Jump() //跳跃和下落
     {
-        if((Input.GetKeyDown(KeyCode.Space)) && (Coll.IsTouchingLayers(Ground)))//跳跃
+        if((Input.GetKeyDown(KeyCode.Space)) && (Coll.IsTouchingLayers(Ground)))//跳跃(一次)
         {
             Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
             Anim.SetBool("Jumping",true); //跳跃动画
@@ -66,18 +71,32 @@ public class PlayerController : MonoBehaviour
         else
         {
             Anim.SetBool("Falling",false);
-        }
+        }             
         if(Coll.IsTouchingLayers(Ground)) //着地
         {
             Anim.SetBool("Idle",true); //站立动画
         }
+        
     }
-    private void OnTriggerEnter2D(Collider2D collision) 
+    private void OnTriggerEnter2D(Collider2D collision) //碰到收集物品
     {
-       if(collision.gameObject.CompareTag("Collection")) //碰到收集物品
+       if(collision.gameObject.CompareTag("Collection")) 
        {
            Destroy(collision.gameObject);
            Cherry += 1;
+           CherryNum.text = Cherry.ToString();
        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision) //碰到敌人
+    {   
+        if(Anim.GetBool("Falling"))
+        {       
+            if(collision.gameObject.CompareTag("Enemy"))
+            {
+                Destroy(collision.gameObject);
+                Anim.SetBool("Jumping",true);
+                Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
+            }
+        }
     }
 }
