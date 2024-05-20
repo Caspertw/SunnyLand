@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     public float Speed;
     public float JumpForce;
     public int Cherry;
+
+    private bool IsHurt;
     
     void Start()
     {
@@ -25,12 +27,20 @@ public class PlayerController : MonoBehaviour
         if (Rb == null || Anim == null)
         {
             Debug.LogError("Rigidbody2D 或 Animator 未正確初始化");
-            return;
         }
     }
     void FixedUpdate()
     {
-        Movement();
+        if(!IsHurt)
+        {
+            Movement();
+        }
+        if(Mathf.Abs(Rb.velocity.x) < 0.1f) //受伤后恢复
+        {
+            IsHurt = false;
+            Anim.SetBool("Hurting",false);
+            Anim.SetBool("Idle",true);
+        }
     }
     void Update()
     {
@@ -89,14 +99,30 @@ public class PlayerController : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision) //碰到敌人
     {   
-        if(Anim.GetBool("Falling"))
+        if(collision.gameObject.CompareTag("Enemy")) 
         {       
-            if(collision.gameObject.CompareTag("Enemy"))
+            if(Anim.GetBool("Falling")) //踩敌人
             {
                 Destroy(collision.gameObject);
                 Anim.SetBool("Jumping",true);
                 Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
             }
+            else
+            {
+                IsHurt = true;
+                Anim.SetBool("Hurting",true);
+                Anim.SetBool("Idle",false);
+                Anim.SetFloat("Running",0);
+
+                if(transform.position.x < collision.gameObject.transform.position.x) //受伤
+                {
+                    Rb.velocity = new Vector2(-8, Rb.velocity.y);
+                }
+                else if(transform.position.x > collision.gameObject.transform.position.x) //受伤
+                {
+                    Rb.velocity = new Vector2(8, Rb.velocity.y);
+                }
+            }
         }
     }
-}
+}   
