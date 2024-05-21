@@ -42,14 +42,15 @@ public class PlayerController : MonoBehaviour
             Anim.SetBool("Hurting",false);
             Anim.SetBool("Idle",true);
             Anim.SetFloat("Running",0);
+            
         }
-        
+        IsGrounded = Coll.IsTouchingLayers(Ground);
     }
     void Update()
     {
         Jump();
         AnimSwitch();
-        IsGrounded = Coll.IsTouchingLayers(Ground);
+        
     }
 
     void Movement() //移动
