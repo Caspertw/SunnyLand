@@ -31,11 +31,13 @@ public class MenuControl : MonoBehaviour
     public void Home()
     {
         SceneManager.LoadScene(0);
+        Time.timeScale = 1;
     }
-    /*public void Restart()
+    public void Restart()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }*/
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Time.timeScale = 1;
+    }
     
     
 

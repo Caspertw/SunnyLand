@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PlayerController : MonoBehaviour
@@ -50,7 +51,6 @@ public class PlayerController : MonoBehaviour
     {
         Jump();
         AnimSwitch();
-        
     }
 
     void Movement() //移动
@@ -94,13 +94,18 @@ public class PlayerController : MonoBehaviour
         }
         
     }
-    private void OnTriggerEnter2D(Collider2D collision) //碰到收集物品
+    private void OnTriggerEnter2D(Collider2D collision) //觸發器
     {
-       if(collision.gameObject.CompareTag("Collection")) 
+       if(collision.gameObject.CompareTag("Collection")) //吃樱桃
        {
            Destroy(collision.gameObject);
            Cherry += 1;
            CherryNum.text = Cherry.ToString();
+       }
+       if(collision.gameObject.CompareTag("DeadLine")) //死亡
+       {
+           //GetComponent<AudioSource>().enabled = false;
+           Invoke("Restart",1f); //延迟1秒
        }
     }
     private void OnCollisionEnter2D(Collision2D collision) //碰到敌人
@@ -109,7 +114,9 @@ public class PlayerController : MonoBehaviour
         {       
             if(Anim.GetBool("Falling")) //踩敌人
             {
-                Destroy(collision.gameObject);
+                Enemy enemy = collision.gameObject.GetComponent<Enemy>(); //調用Enemy腳本
+                enemy.JumpOn();
+
                 Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
                 Anim.SetBool("Jumping",true);
                 Anim.SetFloat("Running",0);
@@ -134,5 +141,11 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+    }
+    void Restart() //重新开始
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Time.timeScale = 1;
+        Debug.Log("Restart");
     }
 }   
