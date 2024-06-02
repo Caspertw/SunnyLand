@@ -5,10 +5,11 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     protected private Animator Anim;
+    protected AudioSource deathAudio;
     protected virtual void Start()
     {
         Anim = GetComponent<Animator>();
-        
+        deathAudio = GetComponent<AudioSource>();
     }
     public void Death()
     { 
@@ -17,6 +18,7 @@ public class Enemy : MonoBehaviour
 
     public void JumpOn()
     {
+        deathAudio.Play();
         Anim.SetTrigger("Death");
     }
 }

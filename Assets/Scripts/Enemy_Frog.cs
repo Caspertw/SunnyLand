@@ -4,32 +4,32 @@ using UnityEngine;
 
 public class Enemy_Frog : Enemy
 {
-    public Transform LeftPoint, RightPoint;
-    public float Speed, JumpForce;
-    public LayerMask Ground;
+    public Transform leftPoint, rightPoint;
+    public float speed, jumpForce;
+    public LayerMask ground;
 
-    private Rigidbody2D Rb;
+    private Rigidbody2D rb;
     //private Animator Anim;
-    private Collider2D Coll;
-    private bool FaceDirection; //Left = false, Right = true
-    private float LeftPointX, RightPointX;
+    private Collider2D coll;
+    private bool faceDirection; //Left = false, Right = true
+    private float leftPointX, rightPointX;
 
 
     protected override void Start()
     {   
         base.Start();
-        Rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         //Anim = GetComponent<Animator>();
-        Coll = GetComponent<Collider2D>();
-        if (Rb == null || Anim == null || Coll == null)
+        coll = GetComponent<Collider2D>();
+        if (rb == null || Anim == null || coll == null)
         {
             Debug.LogError("Rigidbody2D 或 Animator 或 Collider2D 未正確初始化");
         }   
 
-        LeftPointX = LeftPoint.position.x; //获取左右边界
-        RightPointX = RightPoint.position.x;
-        Destroy (LeftPoint.transform.gameObject); //删除左右边界
-        Destroy (RightPoint.transform.gameObject);
+        leftPointX = leftPoint.position.x; //获取左右边界
+        rightPointX = rightPoint.position.x;
+        Destroy (leftPoint.transform.gameObject); //删除左右边界
+        Destroy (rightPoint.transform.gameObject);
     }
     void Update()
     {
@@ -38,31 +38,31 @@ public class Enemy_Frog : Enemy
     }
     void Movement() //移动
     {
-        if(!FaceDirection) //Left
+        if(!faceDirection) //Left
         {   
-            if(Coll.IsTouchingLayers(Ground))
+            if(coll.IsTouchingLayers(ground))
             {
                 Anim.SetBool("Jumping",true);
-                Rb.velocity = new Vector2(-Speed, JumpForce);
+                rb.velocity = new Vector2(-speed, jumpForce);
             }
-            if(transform.position.x < LeftPointX)
+            if(transform.position.x < leftPointX)
             {
                 transform.localScale = new Vector3(-1, 1,1);
-                FaceDirection = true;
+                faceDirection = true;
                 //Debug.Log("Change Direction");
             }
         }
-        if(FaceDirection) //Right
+        if(faceDirection) //Right
         {
-            if(Coll.IsTouchingLayers(Ground))
+            if(coll.IsTouchingLayers(ground))
             {
                 Anim.SetBool("Jumping",true);
-                Rb.velocity = new Vector2(Speed, JumpForce);
+                rb.velocity = new Vector2(speed, jumpForce);
             }
-            if(transform.position.x > RightPointX)
+            if(transform.position.x > rightPointX)
             {
                 transform.localScale = new Vector3(1, 1,1);
-                FaceDirection = false;
+                faceDirection = false;
             }
         } 
         
@@ -71,13 +71,13 @@ public class Enemy_Frog : Enemy
     {
         if(Anim.GetBool("Jumping"))
         {
-            if(Rb.velocity.y < 0.1f)
+            if(rb.velocity.y < 0.1f)
             {
                 Anim.SetBool("Jumping",false);
                 Anim.SetBool("Falling",true);
             }
         }
-        if(Coll.IsTouchingLayers(Ground) && Anim.GetBool("Falling"))
+        if(coll.IsTouchingLayers(ground) && Anim.GetBool("Falling"))
         {
             Anim.SetBool("Falling",false);
             Anim.SetBool("Idle",true);

@@ -248,11 +248,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e10dc3b2442da95489e61767172719d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LeftPoint: {fileID: 7007625218644433032}
-  RightPoint: {fileID: 4931535946332528462}
-  Speed: 5
-  JumpForce: 0
-  Ground:
+  leftPoint: {fileID: 7007625218644433032}
+  rightPoint: {fileID: 4931535946332528462}
+  speed: 3
+  jumpForce: 10
+  ground:
     serializedVersion: 2
     m_Bits: 0
 --- !u!82 &5623655985269881754
@@ -265,8 +265,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
+  m_audioClip: {fileID: 8300000, guid: 7c47b20bb9874304a809dc5580d403ba, type: 3}
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0

@@ -8,44 +8,46 @@ using TMPro;
 public class PlayerController : MonoBehaviour
 {
     //[SerializeField]
-    private Rigidbody2D Rb; 
-    private Animator Anim;
+    private Rigidbody2D rb; 
+    private Animator anim;
+    public AudioSource jumpAudio,hurtAudio,collectAudio;
 
-    public Collider2D Coll;
-    public LayerMask Ground;
-    public TextMeshProUGUI CherryNum;
+    public Collider2D coll;
+    public LayerMask ground;
+    public TextMeshProUGUI cherryNum;
 
-    public float Speed;
-    public float JumpForce;
-    public int Cherry;
+    public float speed;
+    public float jumpForce;
+    public int cherry;
 
-    private bool IsHurt;
-    private bool IsGrounded;
+    private bool isHurt;
+    private bool isGrounded;
     
     void Start()
     {
-        Rb = GetComponent<Rigidbody2D>();
-        Anim = GetComponent<Animator>();
-        if (Rb == null || Anim == null)
+        rb = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        //jumpAudio = GetComponent<AudioSource>();
+        if (rb == null || anim == null)
         {
             Debug.LogError("Rigidbody2D 或 Animator 未正確初始化");
         }
     }
     void FixedUpdate()
     {
-        if(!IsHurt)
+        if(!isHurt)
         {
             Movement();
         }
-        if(Mathf.Abs(Rb.velocity.x) < 0.1f && Mathf.Abs(Rb.velocity.y) < 0.1f) //受伤后恢复
+        if(Mathf.Abs(rb.velocity.x) < 0.1f && Mathf.Abs(rb.velocity.y) < 0.1f) //受伤后恢复
         {
-            IsHurt = false;
-            Anim.SetBool("Hurting",false);
-            Anim.SetBool("Idle",true);
-            Anim.SetFloat("Running",0);
+            isHurt = false;
+            anim.SetBool("Hurting",false);
+            anim.SetBool("Idle",true);
+            anim.SetFloat("Running",0);
             
         }
-        IsGrounded = Coll.IsTouchingLayers(Ground);
+        isGrounded = coll.IsTouchingLayers(ground);
     }
     void Update()
     {
@@ -55,42 +57,43 @@ public class PlayerController : MonoBehaviour
 
     void Movement() //移动
     {
-        float HorizontalMove = Input.GetAxis("Horizontal");
-        float FaceDirection = Input.GetAxisRaw("Horizontal");
-        if(HorizontalMove != 0) //水平移动
+        float horizontalMove = Input.GetAxis("Horizontal");
+        float faceDirection = Input.GetAxisRaw("Horizontal");
+        if(horizontalMove != 0) //水平移动
         {
-            Rb.velocity = new Vector2(HorizontalMove * Speed , Rb.velocity.y);
-            Anim.SetFloat("Running",Mathf.Abs(FaceDirection)); //奔跑动画
+            rb.velocity = new Vector2(horizontalMove * speed , rb.velocity.y);
+            anim.SetFloat("Running",Mathf.Abs(faceDirection)); //奔跑动画
         }
-        if(FaceDirection != 0) //角色朝向
+        if(faceDirection != 0) //角色朝向
         {
-            transform.localScale = new Vector3(FaceDirection, 1, 1);
+            transform.localScale = new Vector3(faceDirection, 1, 1);
         }
     }
     void Jump() //跳跃和下落
     {
-        if((Input.GetKeyDown(KeyCode.Space)) && IsGrounded)//跳跃(一次)
+        if((Input.GetKeyDown(KeyCode.Space)) && isGrounded)//跳跃(一次)
         {
-            Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
-            Anim.SetBool("Jumping",true); //跳跃动画
+            jumpAudio.Play();
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            anim.SetBool("Jumping",true); //跳跃动画
         }
         
     }
     void AnimSwitch() //動畫切換
     {
-        if(Rb.velocity.y < 0) //下落
+        if(rb.velocity.y < 0) //下落
         {
-            Anim.SetBool("Idle",false);
-            Anim.SetBool("Jumping",false);
-            Anim.SetBool("Falling",true);
+            anim.SetBool("Idle",false);
+            anim.SetBool("Jumping",false);
+            anim.SetBool("Falling",true);
         }
         else
         {
-            Anim.SetBool("Falling",false);
+            anim.SetBool("Falling",false);
         }             
-        if(Coll.IsTouchingLayers(Ground)) //着地
+        if(coll.IsTouchingLayers(ground)) //着地
         {
-            Anim.SetBool("Idle",true); //站立动画
+            anim.SetBool("Idle",true); //站立动画
         }
         
     }
@@ -99,8 +102,9 @@ public class PlayerController : MonoBehaviour
        if(collision.gameObject.CompareTag("Collection")) //吃樱桃
        {
            Destroy(collision.gameObject);
-           Cherry += 1;
-           CherryNum.text = Cherry.ToString();
+           cherry += 1;
+           cherryNum.text = cherry.ToString();
+           collectAudio.Play();
        }
        if(collision.gameObject.CompareTag("DeadLine")) //死亡
        {
@@ -112,32 +116,33 @@ public class PlayerController : MonoBehaviour
     {   
         if(collision.gameObject.CompareTag("Enemy")) 
         {       
-            if(Anim.GetBool("Falling")) //踩敌人
+            if(anim.GetBool("Falling")) //踩敌人
             {
                 Enemy enemy = collision.gameObject.GetComponent<Enemy>(); //調用Enemy腳本
                 enemy.JumpOn();
 
-                Rb.velocity = new Vector2(Rb.velocity.x, JumpForce);
-                Anim.SetBool("Jumping",true);
-                Anim.SetFloat("Running",0);
-                Anim.SetBool("Idle",false);
-                Anim.SetBool("Hurting",false);
-                Anim.SetBool("Falling",false);
+                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+                anim.SetBool("Jumping",true);
+                anim.SetFloat("Running",0);
+                anim.SetBool("Idle",false);
+                anim.SetBool("Hurting",false);
+                anim.SetBool("Falling",false);
             }
             else
             {
-                IsHurt = true;
-                Anim.SetBool("Hurting",true);
-                Anim.SetBool("Idle",false);
-                Anim.SetFloat("Running",0);
+                isHurt = true;
+                anim.SetBool("Hurting",true);
+                anim.SetBool("Idle",false);
+                anim.SetFloat("Running",0);
+                hurtAudio.Play();
 
                 if(transform.position.x < collision.gameObject.transform.position.x) //受伤
                 {
-                    Rb.velocity = new Vector2(-8, Rb.velocity.y);
+                    rb.velocity = new Vector2(-8, rb.velocity.y);
                 }
                 else if(transform.position.x > collision.gameObject.transform.position.x) //受伤
                 {
-                    Rb.velocity = new Vector2(8, Rb.velocity.y);
+                    rb.velocity = new Vector2(8, rb.velocity.y);
                 }
             }
         }
