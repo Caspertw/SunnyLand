@@ -4,9 +4,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Cinemachine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance;
+    private CinemachineVirtualCamera cinemachineCamera;
+    
     //[SerializeField]
     private Rigidbody2D rb; 
     private Animator anim;
@@ -14,24 +18,69 @@ public class PlayerController : MonoBehaviour
 
     public Collider2D coll;
     public LayerMask ground;
-    public TextMeshProUGUI cherryNum;
+    public TextMeshProUGUI cherryNumbers;
 
     public float speed;
     public float jumpForce;
     public int cherry;
+    public int extraJump = 2;
 
     private bool isHurt;
     private bool isGrounded;
+
     
+    /*void Awake()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded; 
+        SceneManager.sceneLoaded += OnSceneLoaded; 
+
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (Instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+    void OnSceneLoaded(Scene scene,LoadSceneMode mode)
+    {
+        Debug.Log("Scene loaded: " + scene.name);
+        cherryNumbers = GameObject.Find("cherryNumbers").GetComponent<TextMeshProUGUI>();
+        if (cherryNumbers == null)
+        {
+            Debug.LogError("Failed to find the cherry counter UI component.");
+        }
+        cinemachineCheck();
+        MovePlayerToSpawnPoint();
+    }
+    void OnDestroy() 
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded; 
+    }
+    void cinemachineCheck()
+    {
+        cinemachineCamera = FindObjectOfType<CinemachineVirtualCamera>();
+        if (cinemachineCamera != null)
+        {
+            cinemachineCamera.Follow = transform;
+        }
+        else
+        {
+            Debug.LogError("Cinemachine camera is not assigned!");
+        }
+    }*/
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
-        //jumpAudio = GetComponent<AudioSource>();
         if (rb == null || anim == null)
         {
             Debug.LogError("Rigidbody2D 或 Animator 未正確初始化");
         }
+
+        
     }
     void FixedUpdate()
     {
@@ -71,13 +120,24 @@ public class PlayerController : MonoBehaviour
     }
     void Jump() //跳跃和下落
     {
-        if((Input.GetKeyDown(KeyCode.Space)) && isGrounded)//跳跃(一次)
+        if (isGrounded)
+        {
+            extraJump = 1;
+        }
+        if((Input.GetKeyDown(KeyCode.Space)) && extraJump > 0 )
+        {
+            extraJump --;
+            jumpAudio.Play();
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            anim.SetBool("Jumping",true);
+        }
+        /*if((Input.GetKeyDown(KeyCode.Space)) && isGrounded)//跳跃(一次)
         {
             jumpAudio.Play();
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             anim.SetBool("Jumping",true); //跳跃动画
-        }
-        
+        }*/
+
     }
     void AnimSwitch() //動畫切換
     {
@@ -103,7 +163,7 @@ public class PlayerController : MonoBehaviour
        {
            Destroy(collision.gameObject);
            cherry += 1;
-           cherryNum.text = cherry.ToString();
+           cherryNumbers.text = cherry.ToString();
            collectAudio.Play();
        }
        if(collision.gameObject.CompareTag("DeadLine")) //死亡
@@ -147,10 +207,24 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+    void MovePlayerToSpawnPoint()
+    {
+        
+        GameObject spawnPoint = GameObject.Find("SpawnPoint");
+        if(spawnPoint != null)
+        {
+            transform.position = spawnPoint.transform.position;
+        }
+        else
+        {
+            Debug.LogError("Spawn point not found in the scene!");
+        }
+    }
     void Restart() //重新开始
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         Time.timeScale = 1;
-        Debug.Log("Restart");
+        //Debug.Log("Restart");
+        //Destroy(gameObject);
     }
 }   

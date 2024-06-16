@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour
     }
     public void Death()
     { 
+        GetComponent<Collider2D>().enabled = false;
         Destroy(gameObject);
     }
 
@@ -20,5 +21,6 @@ public class Enemy : MonoBehaviour
     {
         deathAudio.Play();
         Anim.SetTrigger("Death");
+        GetComponent<Collider2D>().enabled = false;
     }
 }
